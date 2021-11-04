@@ -3,8 +3,7 @@ package db
 import io.javalin.websocket.WsConnectContext
 import models.User
 
-class UsersDB (users: MutableMap<String, User>) {
-    val users: MutableMap<String, User> = users
+class UsersDB (val users: MutableMap<String, User>) {
     fun getUser(senderID: String): User? {
         return this.users.get(senderID)
     }

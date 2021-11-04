@@ -1,4 +1,6 @@
 package models
+import com.github.underscore.lodash.Json
+import com.github.underscore.lodash.Json.JsonArray
 import io.javalin.websocket.WsConnectContext
 
 class User (
@@ -18,5 +20,13 @@ class User (
     }
     fun sendMessage(message: String) {
         this.context.send(message)
+    }
+    fun saveMessage(userSender: String, message: String) {
+        val chat: MutableList<String> = this.chats.get(userSender)!!;
+        chat?.add(message)
+        this.chats.set(userSender, chat)
+    }
+    fun getMessages(): String {
+        return Json.toJson(chats)
     }
 }

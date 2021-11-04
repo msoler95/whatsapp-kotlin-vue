@@ -12,7 +12,11 @@ fun main() {
     app.ws("/message/") { ws ->
         ws.onConnect { ctx ->
             usersDB.createUserIfItDoesntExists(ctx)
-            //todo: check for new messages
+            //Set user as online and notify new messages
+            val sender = usersDB.getUser(ctx.queryParam("senderId")!!)
+            sender?.isOnline = true
+            sender?.context = ctx
+            ctx.send(sender!!.getMessages())
         }
         ws.onMessage { ctx ->
             val senderId = ctx.queryParam("senderId")!!
@@ -24,13 +28,17 @@ fun main() {
                 val userReciever: User? = usersDB.getUser(recieverId)
                 userSender?.createChatIfItDoesntExists(recieverId)
                 userReciever?.createChatIfItDoesntExists(senderId)
+                //If user online, sent a message to it
                 if(userReciever?.isOnline == true)
                     userReciever.sendMessage(ctx.message())
-                //todo: else save in db
+                //else save message and send it later when he is online
+                else userReciever?.saveMessage(senderId, ctx.message())
             }
         }
         ws.onClose { ctx ->
-            //todo: set as user active = false
+            val senderId = ctx.queryParam("senderId")!!
+            val userSender: User? = usersDB.getUser(senderId)
+            userSender!!.isOnline = false;
         }
     }
 }
