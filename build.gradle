@@ -15,4 +15,7 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.8.0-beta4'
     implementation group: 'io.javalin', name: 'javalin', version: '4.1.1'
     implementation 'com.github.javadev:underscore:1.71'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.4'
+    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.12.4'
+
 }
