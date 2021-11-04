@@ -41,6 +41,7 @@ fun setUserAsOnlineAndSaveContext(ctx: WsConnectContext) {
 fun sendUserChats(ctx: WsConnectContext) {
     val sender = usersDB.getUser(ctx.queryParam("senderId")!!)
     ctx.send(sender!!.getMessages())
+    sender.deleteMessages()
 }
 
 fun createChatsIfTheyDidntExists(senderId: String, recieverId: String) {

@@ -29,4 +29,9 @@ class User (
     fun getMessages(): String {
         return Json.toJson(chats)
     }
+    fun deleteMessages() {
+        this.chats.forEach {
+            it.value.clear()
+        }
+    }
 }
