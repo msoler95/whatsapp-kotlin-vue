@@ -62,6 +62,7 @@ fun sentMessage(senderId: String, recieverId: String, message: String ) {
 
 fun setUserAsOffline(ctx: WsCloseContext) {
     val senderId = ctx.queryParam("senderId")!!
+    println("User ${senderId} online")
     val userSender: User? = usersDB.getUser(senderId)
     userSender!!.isOnline = false;
 }

@@ -8,12 +8,10 @@ class User (
     var isOnline: Boolean,
     var chats: MutableMap<String, MutableList<String>>,
 ) {
-    fun getChat(contactId: String): MutableList<String>? {
-        return this.chats.get(contactId)
-    }
-    fun chatExists(contactId: String): Boolean? {
-        return this.getChat(contactId) != null
-    }
+    fun getChat(contactId: String): MutableList<String>? = this.chats.get(contactId)
+
+    fun chatExists(contactId: String): Boolean? = this.getChat(contactId) != null
+
     fun createChatIfItDoesntExists(contactId: String)   {
         if(!this.chatExists(contactId)!!)
             this.chats.set(contactId, mutableListOf<String>() )
@@ -26,9 +24,8 @@ class User (
         chat?.add(message)
         this.chats.set(userSender, chat)
     }
-    fun getMessages(): String {
-        return Json.toJson(chats)
-    }
+    fun getMessages(): String = Json.toJson(chats)
+
     fun deleteMessages() {
         this.chats.forEach {
             it.value.clear()
