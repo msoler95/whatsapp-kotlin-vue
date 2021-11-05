@@ -4,6 +4,7 @@ import io.javalin.websocket.WsMessageContext
 import models.User
 import db.UsersDB
 import io.javalin.websocket.WsCloseContext
+import java.lang.RuntimeException
 
 val usersDB = UsersDB(mutableMapOf<String, User>())
 var idInit = 0;
@@ -12,14 +13,15 @@ fun main() {
     val app = Javalin.create().start(7001)
     app.ws("/message/") { ws ->
         ws.onConnect { ctx ->
-            usersDB.createUserIfItDoesntExists(ctx)
-            setUserAsOnlineAndSaveContext(ctx)
-            sendUserChats(ctx)
+            val senderId = getQueryParam(ctx, "senderId")
+            usersDB.createUserIfItDoesntExists(ctx, senderId)
+            setUserAsOnlineAndSaveContext(ctx, senderId)
+            sendUserChats(ctx, senderId)
         }
         ws.onMessage { ctx ->
-            val senderId = ctx.queryParam("senderId")!!
-            val recieverId = ctx.queryParam("recieverId")!!
-            if(!usersDB.existUser(recieverId))
+            val senderId = getQueryParam(ctx, "senderId")
+            val recieverId = getQueryParam(ctx, "recieverId")
+            if  (!usersDB.existUser(recieverId))
                 ctx.send("Contact no exist")
             else {
                 createChatsIfTheyDidntExists(senderId, recieverId)
@@ -32,38 +34,47 @@ fun main() {
     }
 }
 
-fun setUserAsOnlineAndSaveContext(ctx: WsConnectContext) {
-    val sender = usersDB.getUser(ctx.queryParam("senderId")!!)
-    sender?.isOnline = true
-    sender?.context = ctx
+fun setUserAsOnlineAndSaveContext(ctx: WsConnectContext, senderId: String) {
+    val sender = usersDB.getUser(senderId)
+    sender.isOnline = true  //todo: check how to modify with setter
+    sender.context = ctx
 }
 
-fun sendUserChats(ctx: WsConnectContext) {
-    val sender = usersDB.getUser(ctx.queryParam("senderId")!!)
-    ctx.send(sender!!.getMessages())
+fun sendUserChats(ctx: WsConnectContext, senderId: String) {
+    val sender = usersDB.getUser(senderId)
+    ctx.send(sender.getMessages())
     sender.deleteMessages()
 }
 
 fun createChatsIfTheyDidntExists(senderId: String, recieverId: String) {
-    val userSender: User? = usersDB.getUser(senderId)
-    val userReciever: User? = usersDB.getUser(recieverId)
-    userSender?.createChatIfItDoesntExists(recieverId)
-    userReciever?.createChatIfItDoesntExists(senderId)
+    val userSender: User = usersDB.getUser(senderId)
+    val userReciever: User = usersDB.getUser(recieverId)
+    userSender.createChatIfItDoesntExists(recieverId)
+    userReciever.createChatIfItDoesntExists(senderId)
 }
 
 fun sentMessage(senderId: String, recieverId: String, message: String ) {
-    val userReciever: User? = usersDB.getUser(recieverId)
+    val userReciever: User = usersDB.getUser(recieverId)
     //If user online, sent a message to it
-    if(userReciever?.isOnline == true)
+    if(userReciever.isOnline == true)
         userReciever.sendMessage(message)
     //else save message and send it later when he is online
-    else userReciever?.saveMessage(senderId, message)
+    else userReciever.saveMessage(senderId, message)
 }
 
 fun setUserAsOffline(ctx: WsCloseContext) {
-    val senderId = ctx.queryParam("senderId")!!
+    val senderId = getQueryParam(ctx, "senderId")
     println("User ${senderId} online")
-    val userSender: User? = usersDB.getUser(senderId)
-    userSender!!.isOnline = false;
+    val userSender: User = usersDB.getUser(senderId)
+    userSender.isOnline = false;
 }
+
+fun getQueryParam(ctx: WsConnectContext, parameter: String): String =
+    ctx.queryParam(parameter) ?: throw RuntimeException("missing parameter " + parameter)
+fun getQueryParam(ctx: WsMessageContext, parameter: String): String =
+    ctx.queryParam(parameter) ?: throw RuntimeException("missing parameter " + parameter)
+fun getQueryParam(ctx: WsCloseContext, parameter: String): String =
+    ctx.queryParam(parameter) ?: throw RuntimeException("missing parameter " + parameter)
+
+
 
