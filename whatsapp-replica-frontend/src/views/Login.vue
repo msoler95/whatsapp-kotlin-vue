@@ -1,11 +1,27 @@
 <template>
-  <div><v-btn>Login</v-btn><v-icon ligth aria-hidden="false">
-    mdi-account
-  </v-icon></div>
+  <div>
+    <v-text-field v-model="userId"></v-text-field>
+    <v-text-field v-model="friendId"></v-text-field>
+    <v-btn @click="startChat()">send</v-btn>
+  </div>
+
 
 </template>
 <script>
 export default {
-  name: 'Login'
+  name: 'Login',
+  data() {
+    return {
+      userId: 1,
+      friendId: 2
+    }
+  },
+  methods: {
+    startChat() {
+      if(this.userId != '' && this.friendId != '') {
+        this.$router.push({ name: 'Chat', params: { userId: this.userId, friendId: this.friendId } })
+      }
+    }
+  }
 }
 </script>

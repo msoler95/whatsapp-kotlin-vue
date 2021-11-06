@@ -33,7 +33,7 @@
                     <img src="https://avatars2.githubusercontent.com/u/398893?s=128" alt="Avatar">
                   </div>
                   <div class="name">
-                    <span>Usuario 1</span>
+                    <span>{{friendId}}</span>
                     <span class="status">online</span>
                   </div>
                   <div class="actions more">
@@ -89,15 +89,18 @@ export default {
   data() {
     return {
       messages: [],
-      inputMessage: ""
+      inputMessage: "",
+      friendId: ""
     }
   },
   created() {
-    console.log("Starting connection to WebSocket Server")
-    this.connection = new WebSocket("ws://localhost:7001/message?senderId=1&recieverId=2")
+    this.friendId = this.$route.params.friendId
+    console.log("Starting connection to WebSocket Server", "ws://localhost:7001/message?senderId="+this.$route.params.userId+"&recieverId="+this.$route.params.friendId)
+    this.connection = new WebSocket("ws://localhost:7001/message?senderId="+this.$route.params.userId+"&recieverId="+this.$route.params.friendId)
     //todo: implement the recovery of the new messages
     let vm = this;
     this.connection.onmessage = function(event) {
+      console.log('eveeent', event)
       vm.messages.push(JSON.parse(event.data))
     }
 
@@ -111,7 +114,7 @@ export default {
       //todo: posar que depenent de qui l'envia el v-for es faci d'una manera o altra
       if(this.inputMessage != "") {
         this.messages.push({"type": "reciever", "data": this.inputMessage})
-        this.connection.send({"type": "sender", "data": this.inputMessage})
+        this.connection.send(JSON.stringify({"type": "sender", "data": this.inputMessage}))
         this.inputMessage = "";
       }
     }
