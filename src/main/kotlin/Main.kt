@@ -1,9 +1,11 @@
+import com.google.gson.Gson
 import io.javalin.Javalin
 import io.javalin.websocket.WsConnectContext
 import io.javalin.websocket.WsMessageContext
 import models.User
 import db.UsersDB
 import io.javalin.websocket.WsCloseContext
+import models.Message
 import java.lang.RuntimeException
 
 val usersDB = UsersDB(mutableMapOf<String, User>())
@@ -42,7 +44,7 @@ fun setUserAsOnlineAndSaveContext(ctx: WsConnectContext, senderId: String) {
 
 fun sendUserChats(ctx: WsConnectContext, senderId: String) {
     val sender = usersDB.getUser(senderId)
-    ctx.send(sender.getMessages())
+    ctx.send("""{ "type": "new-messages", "data": """ + sender.getMessages() + "}");
     sender.deleteMessages()
 }
 
@@ -64,7 +66,6 @@ fun sentMessage(senderId: String, recieverId: String, message: String ) {
 
 fun setUserAsOffline(ctx: WsCloseContext) {
     val senderId = getQueryParam(ctx, "senderId")
-    println("User ${senderId} online")
     val userSender: User = usersDB.getUser(senderId)
     userSender.isOnline = false;
 }
