@@ -21,7 +21,6 @@ export default {
   methods: {
     login() {
         this.$router.push('chats/' + this.yourName )
-
     }
   }
 }
