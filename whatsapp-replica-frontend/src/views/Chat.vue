@@ -26,8 +26,8 @@
             <div class="chat">
               <div class="chat-container">
                 <div class="user-bar">
-                  <div class="back">
-                    <i class="zmdi zmdi-arrow-left"></i>
+                  <div class="back" @click="goBack()">
+                    <v-icon dark >mdi-arrow-left</v-icon>
                   </div>
                   <div class="avatar">
                     <v-icon dark large>mdi-account-circle</v-icon>
@@ -117,6 +117,9 @@ export default {
         this.connection.send(JSON.stringify({"type": "sender", "data": this.inputMessage}))
         this.inputMessage = "";
       }
+    },
+    goBack() {
+      this.$router.back()
     }
   }
 }

@@ -26,9 +26,7 @@
             <div class="chat">
               <div class="chat-container">
                 <div class="user-bar">
-                  <div class="back">
-                    <i class="zmdi zmdi-arrow-left"></i>
-                  </div>
+
                   <div class="name">
                     <span>Whatsapp</span>
                   </div>
@@ -47,10 +45,10 @@
                       subheader
                       two-line
                   >
-                    <template v-for="folder in folders">
-                      <v-list-item
-
-                          :key="folder.title"
+                    <template v-for="chat in openChats">
+                      <v-list-item v-if="chat.user"
+                          :key="chat.user"
+                          @click="navigateToChat(chat.user)"
                       >
                         <v-list-item-avatar style="margin-right: 10px">
                           <div class="avatar" >
@@ -59,21 +57,20 @@
                         </v-list-item-avatar>
 
                         <v-list-item-content>
-                          <v-list-item-title v-text="folder.title"></v-list-item-title>
+                          <v-list-item-title v-if="chat.user" v-text="chat.user"></v-list-item-title>
 
-                          <v-list-item-subtitle v-text="folder.subtitle"></v-list-item-subtitle>
                         </v-list-item-content>
 
                         <v-list-item-action>
                           <v-btn icon>
-                           <div style="background-color: limegreen; color: white; border-radius: 50px; width: 20px; height: 20px; padding-top: 1px">
-                             3
+                           <div v-if="chat.numberOfMessages" style="background-color: limegreen; color: white; border-radius: 50px; width: 20px; height: 20px; padding-top: 1px">
+                             {{chat.numberOfMessages}}
                            </div>
                           </v-btn>
                         </v-list-item-action>
                         <br>
                       </v-list-item>
-                      <v-divider :key="folder" style="margin-left: 65px; margin-right: 15px"></v-divider>
+                      <v-divider v-if="chat.user" :key="chat.user" style="margin-left: 65px; margin-right: 15px"></v-divider>
                     </template>
 
                   </v-list>
@@ -90,6 +87,7 @@
 <script>
 export default {
   data: () => ({
+    openChats: [],
     files: [
       {
         color: 'blue',
@@ -119,5 +117,32 @@ export default {
       },
     ],
   }),
+  methods: {
+    navigateToChat(friendId) {
+      this.$router.push("/chat/"+ this.$route.params.userId +"/"+ friendId)
+    }
+  },
+  created() {
+    this.connection = new WebSocket("ws://localhost:7001/message?senderId="+this.$route.params.userId)
+    let vm = this;
+    this.connection.onmessage = function(event) {
+      var chats =  JSON.parse(event.data);
+      console.log('chats, c')
+      if(chats.type == 'new-messages') {
+        for(var chat in chats.data) {
+          if(chat != undefined) {
+            let messageToPush = {user: chat, numberOfMessages: chats.data[chat].length};
+            console.log(messageToPush)
+            vm.openChats.push(messageToPush)
+          }
+
+        }
+
+
+      }
+    }
+
+
+  }
 }
 </script>
