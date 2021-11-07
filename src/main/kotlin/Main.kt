@@ -9,16 +9,20 @@ import models.Message
 import java.lang.RuntimeException
 
 val usersDB = UsersDB(mutableMapOf<String, User>())
-var idInit = 0;
-
+lateinit var userCtx :WsConnectContext ;
 fun main() {
     val app = Javalin.create().start(7001)
     app.ws("/message/") { ws ->
         ws.onConnect { ctx ->
+            userCtx = ctx;
             val senderId = getQueryParam(ctx, "senderId")
+            print("Contacto " + senderId + " conectado")
             usersDB.createUserIfItDoesntExists(ctx, senderId)
             setUserAsOnlineAndSaveContext(ctx, senderId)
-            sendUserChats(ctx, senderId)
+            sendUserChats(userCtx, senderId)
+        }
+        ws.onClose { ctx ->
+            setUserAsOffline(ctx)
         }
         ws.onMessage { ctx ->
             val senderId = getQueryParam(ctx, "senderId")
@@ -30,9 +34,7 @@ fun main() {
                 sentMessage(senderId, recieverId, ctx.message())
             }
         }
-        ws.onClose { ctx ->
-            setUserAsOffline(ctx)
-        }
+
     }
 }
 
