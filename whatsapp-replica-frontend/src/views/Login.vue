@@ -1,15 +1,17 @@
 <template>
   <div>
-    <v-text-field v-model="userId"></v-text-field>
-    <v-text-field v-model="friendId"></v-text-field>
-    <v-btn @click="startChat()">send</v-btn>
+    <h1  style="padding-top: 100px">Welcome to whatsapp!</h1>
+      <v-card-title style="padding-top: 50px" class="text-h5 grey lighten-2">
+        <p style="margin-right: 10px">Your name: </p>
+        <v-text-field v-model="yourName"></v-text-field>
+      </v-card-title>
+      <v-btn large color="#004e45" @click="login()" ><p style="color: white" >Log in</p></v-btn>
+      <p style="position: absolute; bottom: 5px; left:0; right:0; ">By msoler95</p>
   </div>
-
-
 </template>
 <script>
 export default {
-  name: 'Login',
+  yourName: '',
   data() {
     return {
       userId: 1,
@@ -17,10 +19,9 @@ export default {
     }
   },
   methods: {
-    startChat() {
-      if(this.userId != '' && this.friendId != '') {
-        this.$router.push({ name: 'Chat', params: { userId: this.userId, friendId: this.friendId } })
-      }
+    login() {
+        this.$router.push('chats/' + this.yourName )
+
     }
   }
 }

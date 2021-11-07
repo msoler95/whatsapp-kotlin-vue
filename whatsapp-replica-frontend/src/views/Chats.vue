@@ -28,16 +28,7 @@
                 <div class="user-bar">
 
                   <div class="name">
-                    <span>Whatsapp</span>
-                  </div>
-                  <div class="actions more">
-                    <i class="zmdi zmdi-more-vert"></i>
-                  </div>
-                  <div class="actions attachment">
-                    <i class="zmdi zmdi-attachment-alt"></i>
-                  </div>
-                  <div class="actions">
-                    <i class="zmdi zmdi-phone"></i>
+                    <span>Whatsapp de {{this.$route.params.userId}}</span>
                   </div>
                 </div>
                 <div class="content">
@@ -72,9 +63,7 @@
                       </v-list-item>
                       <v-divider v-if="chat.user" :key="chat.user" style="margin-left: 65px; margin-right: 15px"></v-divider>
                     </template>
-
                   </v-list>
-
                 </div>
               </div>
             </div>
@@ -82,11 +71,60 @@
         </div>
       </div>
     </div>
+    <v-row justify="center" data-app>
+      <v-dialog
+          v-model="dialoguito"
+          fullscreen
+          hide-overlay
+          transition="dialog-bottom-transition"
+      >
+
+        <v-card>
+          <v-toolbar
+              dark
+              color="#004e45"
+          >
+
+            <v-toolbar-title>New contact</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-toolbar-items>
+              <v-btn
+                  dark
+                  text
+                  @click="dialoguito = false"
+              >
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </v-toolbar-items>
+          </v-toolbar>
+          <v-card-title class="text-h5 grey lighten-2">
+          <p style="margin-right: 10px">Name: </p>
+          <v-text-field v-model="addContactValue"></v-text-field>
+
+          </v-card-title>
+          <v-btn large color="#004e45" @click="addContact()" ><p style="color: white" >Add contact</p></v-btn>
+        </v-card>
+      </v-dialog>
+    </v-row>
+    <v-btn
+        @click="dialoguito = !dialoguito"
+        class="mx-2"
+        style="position: fixed; right: 10px; bottom: 10px"
+        color="#004e45"
+        fab
+        dark
+    >
+      <v-icon dark>
+        mdi-plus
+      </v-icon>
+    </v-btn>
   </div>
 </template>
 <script>
 export default {
   data: () => ({
+    addContactValue: '',
+    dialoguito: false,
     openChats: [],
     files: [
       {
@@ -120,6 +158,10 @@ export default {
   methods: {
     navigateToChat(friendId) {
       this.$router.push("/chat/"+ this.$route.params.userId +"/"+ friendId)
+    },
+    addContact() {
+      this.$router.push("/chat/"+ this.$route.params.userId +"/"+ this.addContactValue)
+      this.addContactValue = '';
     }
   },
   created() {
@@ -127,8 +169,10 @@ export default {
     let vm = this;
     this.connection.onmessage = function(event) {
       var chats =  JSON.parse(event.data);
-      console.log('chats, c')
+      console.log('chats, c', event)
+
       if(chats.type == 'new-messages') {
+        vm.openChats = [];
         for(var chat in chats.data) {
           if(chat != undefined) {
             let messageToPush = {user: chat, numberOfMessages: chats.data[chat].length};
